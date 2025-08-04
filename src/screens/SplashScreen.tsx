@@ -21,7 +21,7 @@ export default function SplashScreen({ navigation }: any) {
     // Navigate after 2 seconds
     const timer = setTimeout(() => {
       navigation.replace('Signup');
-    }, 2000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, [fadeAnim, navigation]);
