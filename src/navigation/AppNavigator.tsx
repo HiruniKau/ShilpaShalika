@@ -14,6 +14,12 @@ export type RootStackParamList = {
   Signin: undefined;
   Signup: undefined;
   SearchResults: undefined;
+  Home: undefined; 
+  Profile: undefined; 
+  PostAd: undefined; 
+  Terms: undefined; 
+  Settings: undefined; 
+  Notifications: undefined;
 
 };
 
