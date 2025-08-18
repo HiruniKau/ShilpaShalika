@@ -31,7 +31,7 @@ export default function LecturerPanel() {
 const lecturerStyles = StyleSheet.create({
   scrollView: {
     paddingRight: 20,
-    paddingBottom:20,
+    paddingBottom:10,
   },
   card: {
     width: 150,
@@ -47,7 +47,7 @@ const lecturerStyles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 120,
+    height: 140,
     resizeMode: 'cover',
   },
   infoContainer: {
