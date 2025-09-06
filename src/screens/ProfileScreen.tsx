@@ -1,4 +1,3 @@
-// src/screens/ProfileScreen.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,12 +7,30 @@ import {
   TextInput,
   Alert,
   Image,
+  Modal,
+  Dimensions,
 } from "react-native";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
-// import storage from "@react-native-firebase/storage"; // Not needed for this approach
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "react-native-image-picker";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+// NOTE: You will need to define this type based on your AppNavigator setup.
+declare type RootStackParamList = {
+  Signin: undefined;
+  Home: undefined;
+  Classes: undefined;
+  Announcements: undefined;
+  Profile: undefined;
+  // Add other screen names here as needed
+  PostAd: undefined;
+  Terms: undefined;
+  Settings: undefined;
+  Notifications: undefined;
+  PaymentDetails: undefined;
+};
 
 interface Student {
   fullName: string;
@@ -24,27 +41,48 @@ interface Student {
   profilePic?: string;
 }
 
-const ProfileScreen = ({ navigation }: any) => {
+const windowWidth = Dimensions.get('window').width;
+
+const ProfileScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [student, setStudent] = useState<Student | null>(null);
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
     const fetchStudent = async () => {
       try {
         const uid = auth().currentUser?.uid;
-        if (!uid) return;
-
-        const doc = await firestore().collection("students").doc(uid).get();
-        if (doc.exists()) {
-          const data = doc.data() as Student;
-          setStudent(data);
-          setGender(data.gender || "");
+        if (!uid) {
+          setLoading(false);
+          return;
         }
+
+        // Use onSnapshot for real-time updates, similar to the original request
+        const unsubscribe = firestore().collection("students").doc(uid).onSnapshot(
+          (doc) => {
+            if (doc.exists()) {
+              const data = doc.data() as Student;
+              setStudent(data);
+              setGender(data.gender || "");
+            } else {
+              setStudent(null);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Error fetching student data:", error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to fetch profile data.");
+          }
+        );
+
+        return () => unsubscribe();
       } catch (error) {
-        console.error("Error fetching student:", error);
-      } finally {
+        console.error("Error setting up Firestore listener:", error);
         setLoading(false);
+        Alert.alert("Error", "Could not connect to the database.");
       }
     };
 
@@ -52,27 +90,19 @@ const ProfileScreen = ({ navigation }: any) => {
   }, []);
 
   // Update gender automatically when changed
-  useEffect(() => {
-    const updateGender = async () => {
-      try {
-        const uid = auth().currentUser?.uid;
-        if (!uid) return;
-        if (gender.trim() === "") return;
-
-        await firestore().collection("students").doc(uid).update({
-          gender: gender,
-        });
-
-        setStudent((prev) => (prev ? { ...prev, gender } : prev));
-      } catch (error) {
-        console.error("Error updating gender:", error);
-      }
-    };
-
-    if (student) {
-      updateGender();
+  const handleUpdateGender = async (text: string) => {
+    setGender(text);
+    const uid = auth().currentUser?.uid;
+    if (!uid) return;
+    try {
+      await firestore().collection("students").doc(uid).update({
+        gender: text,
+      });
+    } catch (error) {
+      console.error("Error updating gender:", error);
+      Alert.alert("Error", "Failed to update gender.");
     }
-  }, [gender]);
+  };
 
   // Upload profile picture (using local URI)
   const handleUploadProfilePic = async () => {
@@ -86,12 +116,8 @@ const ProfileScreen = ({ navigation }: any) => {
       ImagePicker.launchImageLibrary(
         { mediaType: "photo", quality: 0.7 },
         async (response) => {
-          if (response.didCancel) {
-            console.log("User cancelled image picker");
-            return;
-          }
+          if (response.didCancel) return;
           if (response.errorMessage) {
-            console.log("ImagePicker Error: ", response.errorMessage);
             Alert.alert("Error", response.errorMessage);
             return;
           }
@@ -114,7 +140,6 @@ const ProfileScreen = ({ navigation }: any) => {
               setStudent((prev) =>
                 prev ? { ...prev, profilePic: uri } : prev
               );
-
               Alert.alert("Success", "Profile picture updated!");
             } catch (firestoreError) {
               console.error("Firestore Update Error:", firestoreError);
@@ -162,10 +187,13 @@ const ProfileScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      {/* Header with Hamburger */}
+      {/* Header with Logo and Hamburger */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+        <Image
+          source={require('../assets/images/header.png')} // Replace with your logo path
+          style={styles.logo}
+        />
+        <TouchableOpacity onPress={() => setMenuVisible(true)}>
           <Icon name="menu" size={28} color="#000" />
         </TouchableOpacity>
       </View>
@@ -179,7 +207,9 @@ const ProfileScreen = ({ navigation }: any) => {
               style={styles.avatarImage}
             />
           ) : (
-            <Text style={styles.plus}>+</Text>
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.plus}>+</Text>
+            </View>
           )}
         </TouchableOpacity>
         <Text style={styles.name}>{student.fullName}</Text>
@@ -204,20 +234,61 @@ const ProfileScreen = ({ navigation }: any) => {
             style={styles.input}
             placeholder="Enter Gender"
             value={gender}
-            onChangeText={setGender}
+            onChangeText={handleUpdateGender}
           />
         </View>
       </View>
 
-      {/* Logout */}
+      {/* Logout Button */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>⏻ Logout</Text>
+        <Icon name="logout" size={20} color="#fff" />
+        <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+
+      {/* Side Menu Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setMenuVisible(false)}
+        >
+          <View style={styles.sideMenuContainer}>
+            <View style={styles.sideMenu}>
+              <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.closeButton}>
+                <Icon name="close" size={28} color="#000" />
+              </TouchableOpacity>
+              <View style={styles.menuHeader}>
+                <Text style={styles.menuTitle}>Menu</Text>
+              </View>
+              {/* Menu items */}
+              <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('PaymentDetails'); setMenuVisible(false); }}>
+                <Icon name="credit-card" size={20} color="#1800ad" />
+                <Text style={styles.menuItemText}>Payment Details</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('Settings'); setMenuVisible(false); }}>
+                <Icon name="cog" size={20} color="#1800ad" />
+                <Text style={styles.menuItemText}>Settings</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('Terms'); setMenuVisible(false); }}>
+                <Icon name="file-document" size={20} color="#1800ad" />
+                <Text style={styles.menuItemText}>Terms of Use</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('Notifications'); setMenuVisible(false); }}>
+                <Icon name="bell" size={20} color="#1800ad" />
+                <Text style={styles.menuItemText}>Notifications</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
-
-export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -225,15 +296,23 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
   },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 20,
+    marginTop:3,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  logo: {
+    width: 250, // Adjust width as needed
+    height: 80, // Adjust height as needed
+    resizeMode: 'contain',
+    marginTop:9,
   },
   profileHeader: {
     alignItems: "center",
@@ -252,6 +331,12 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: "100%",
     height: "100%",
+  },
+  avatarPlaceholder: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   plus: {
     fontSize: 36,
@@ -306,15 +391,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 10,
     alignSelf: "center",
+    flexDirection: 'row', // Align icon and text horizontally
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10, // Add space between icon and text
   },
   logoutText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },
-  center: {
+  // --- Side Menu Styles ---
+  modalOverlay: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end", // Align the menu to the right
+    alignItems: "flex-end",
+  },
+  sideMenuContainer: {
+    width: windowWidth * 0.7, // 70% of screen width
+    height: "100%",
+    backgroundColor: "#fff",
+  },
+  sideMenu: {
+    flex: 1,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    padding: 10,
+  },
+  menuHeader: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingBottom: 10,
+  },
+  menuTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  menuItem: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  menuItemText: {
+    marginLeft: 15,
+    fontSize: 16,
+    color: "#333",
   },
 });
+
+export default ProfileScreen;
