@@ -1,8 +1,25 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
+// NOTE: You will need to define this type based on your AppNavigator setup.
+declare type RootStackParamList = {
+  Signin: undefined;
+  Home: undefined;
+  Classes: undefined;
+  Announcements: undefined;
+  Profile: undefined;
+  PostAd: undefined;
+  Terms: undefined;
+  Settings: undefined;
+  Notifications: undefined;
+  PaymentDetails: undefined;
+};
+
 const PaymentDetailsScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [activeTab, setActiveTab] = useState('pending');
   
   // Dummy data for payments
@@ -36,16 +53,16 @@ const PaymentDetailsScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header with Logo */}
+      {/* Header */}
       <View style={styles.header}>
-        <Image
-          source={require('../assets/images/header.png')}
-          style={styles.logo}
-        />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-left" size={28} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Payment Details</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={styles.title}>Payments Details</Text>
+        <Text style={styles.title}>Payments</Text>
 
         {/* Payment Tabs */}
         <View style={styles.tabContainer}>
@@ -120,9 +137,21 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-start",
     alignItems: "center",
-    marginBottom: 5,
+    paddingHorizontal: 16,
+    paddingTop: 25,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
   },
   logo: {
     width: 200,
@@ -137,7 +166,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 20,
-    textAlign:'center'
+    marginTop: 20,
+    textAlign:'center',
+    
   },
   tabContainer: {
     flexDirection: 'row',
