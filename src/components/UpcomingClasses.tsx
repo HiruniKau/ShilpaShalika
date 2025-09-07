@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  FlatList
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
@@ -39,6 +40,7 @@ const UpcomingClasses: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [classes, setClasses] = useState<ClassDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const flatListRef = useRef<FlatList<ClassDetail>>(null);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -82,9 +84,52 @@ const UpcomingClasses: React.FC = () => {
     fetchClasses();
   }, []);
 
+  
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      if (flatListRef.current && classes.length > 0) {
+        flatListRef.current.scrollToIndex({
+          index: index % classes.length,
+          animated: true,
+        });
+        index++;
+      }
+    }, 2000); // Scroll every 3 seconds
+    return () => clearInterval(interval);
+  }, [classes]);
+
   const handleClassPress = (classId: string) => {
     navigation.navigate('ClassDetails', { classId });
   };
+
+  const renderClassCard = ({ item }: { item: ClassDetail }) => (
+    <TouchableOpacity
+      style={styles.classCard}
+      onPress={() => handleClassPress(item.id)}
+    >
+      
+      {item.imageUrl ? (
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={styles.classImage}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={styles.imagePlaceholder}>
+          <Text style={styles.placeholderText}>No Image</Text>
+        </View>
+      )}
+      
+      <View style={styles.classInfo}>
+        <Text style={styles.subjectText}>{item.subject}</Text>
+        <Text style={styles.teacherText}>Lecturer: {item.teacherName}</Text>
+        {item.adminSionFee && (
+          <Text style={styles.feeText}>{item.adminSionFee}/Month</Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 
   if (loading) {
     return (
@@ -97,45 +142,23 @@ const UpcomingClasses: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Upcoming New Classes</Text>
-      <ScrollView 
-        horizontal 
+      
+      <FlatList
+        ref={flatListRef}
+        data={classes}
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-      >
-        {classes.map((classItem) => (
-          <TouchableOpacity
-            key={classItem.id}
-            style={styles.classCard}
-            onPress={() => handleClassPress(classItem.id)}
-          >
-            <View style={styles.classHeader}>
-              <Text style={styles.yearText}>{classItem.examYear}</Text>
-              <Text style={styles.levelText}>ADVANCED LEVEL</Text>
-            </View>
-            
-            {classItem.imageUrl ? (
-              <Image
-                source={{ uri: classItem.imageUrl }}
-                style={styles.classImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.placeholderText}>No Image</Text>
-              </View>
-            )}
-            
-            <View style={styles.classInfo}>
-              <Text style={styles.subjectText}>{classItem.subject}</Text>
-              <Text style={styles.teacherText}>Lecturer: {classItem.teacherName}</Text>
-              {classItem.adminSionFee && (
-                <Text style={styles.feeText}>{classItem.adminSionFee}/Month</Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+        renderItem={renderClassCard}
+        keyExtractor={item => item.id}
+        snapToInterval={width * 0.7 + 16}
+        decelerationRate="fast"
+        getItemLayout={(data, index) => ({
+          length: width * 0.7 + 16,
+          offset: (width * 0.7 + 16) * index,
+          index,
+        })}
+      />
     </View>
   );
 };
@@ -184,11 +207,11 @@ const styles = StyleSheet.create({
   },
   classImage: {
     width: '100%',
-    height: 150,
+    height: 130,
   },
   imagePlaceholder: {
     width: '100%',
-    height: 150,
+    height: 130,
     backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
@@ -203,7 +226,7 @@ const styles = StyleSheet.create({
   subjectText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1800ad',
     marginBottom: 5,
   },
   teacherText: {
