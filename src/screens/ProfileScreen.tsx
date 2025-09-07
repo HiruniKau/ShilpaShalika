@@ -9,6 +9,7 @@ import {
   Image,
   Modal,
   Dimensions,
+  ScrollView
 } from "react-native";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
@@ -197,53 +198,54 @@ const ProfileScreen = () => {
           <Icon name="menu" size={28} color="#000" />
         </TouchableOpacity>
       </View>
+      <ScrollView style={styles.contentContainer}>
+        {/* Profile Header */}
+        <View style={styles.profileHeader}>
+          <TouchableOpacity style={styles.avatar} onPress={handleUploadProfilePic}>
+            {student.profilePic ? (
+              <Image
+                source={{ uri: student.profilePic }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.plus}>+</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <Text style={styles.name}>{student.fullName}</Text>
+          <Text style={styles.email}>{student.email}</Text>
+        </View>
 
-      {/* Profile Header */}
-      <View style={styles.profileHeader}>
-        <TouchableOpacity style={styles.avatar} onPress={handleUploadProfilePic}>
-          {student.profilePic ? (
-            <Image
-              source={{ uri: student.profilePic }}
-              style={styles.avatarImage}
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Student ID</Text>
+            <Text style={styles.value}>{student.studentId}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Phone Number</Text>
+            <Text style={styles.value}>{student.phoneNumber}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Gender</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Gender"
+              value={gender}
+              onChangeText={handleUpdateGender}
             />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.plus}>+</Text>
-            </View>
-          )}
+          </View>
+        </View>
+
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Icon name="logout" size={20} color="#fff" />
+          <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-        <Text style={styles.name}>{student.fullName}</Text>
-        <Text style={styles.email}>{student.email}</Text>
-      </View>
-
-      {/* Info Card */}
-      <View style={styles.infoCard}>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Student ID</Text>
-          <Text style={styles.value}>{student.studentId}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Phone Number</Text>
-          <Text style={styles.value}>{student.phoneNumber}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Gender</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Gender"
-            value={gender}
-            onChangeText={handleUpdateGender}
-          />
-        </View>
-      </View>
-
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Icon name="logout" size={20} color="#fff" />
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+      </ScrollView>
 
       {/* Side Menu Modal */}
       <Modal
@@ -293,8 +295,10 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#fff",
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
   },
   center: {
     flex: 1,
@@ -305,14 +309,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    marginTop:3,
+    paddingHorizontal: 16,
+    paddingTop: 10, // Use a value that looks good on both iOS and Android
+    paddingBottom: 20,
   },
   logo: {
     width: 250, // Adjust width as needed
     height: 80, // Adjust height as needed
     resizeMode: 'contain',
-    marginTop:9,
   },
   profileHeader: {
     alignItems: "center",
