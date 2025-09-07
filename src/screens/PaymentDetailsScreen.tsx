@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   logo: {
     width: 200,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     marginBottom: 20,
     textAlign:'center'
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
     textAlign: 'center'
