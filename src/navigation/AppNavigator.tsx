@@ -11,6 +11,7 @@ import PaymentDetailsScreen from '../screens/PaymentDetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TermsOfUseScreen from '../screens/TermsofUse';
 import NotificationScreen from '../screens/NotificationsScreen';
+import ClassDetailsScreen from '../screens/ClassDetailsScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -24,7 +25,8 @@ export type RootStackParamList = {
   Terms: undefined; 
   Settings: undefined; 
   Notifications: undefined;
-  PaymentDetails: undefined
+  PaymentDetails: undefined;
+  ClassDetails: undefined;
 
 };
 
@@ -43,6 +45,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Terms" component={TermsOfUseScreen} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
+        <Stack.Screen name="ClassDetails" component={ClassDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
