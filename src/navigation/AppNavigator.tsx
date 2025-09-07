@@ -9,6 +9,7 @@ import MainTabs from './MainTabs';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import PaymentDetailsScreen from '../screens/PaymentDetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import TermsOfUseScreen from '../screens/TermsofUse';
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -39,6 +40,7 @@ export default function AppNavigator() {
         <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
         <Stack.Screen name="PaymentDetails" component={PaymentDetailsScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Terms" component={TermsOfUseScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
