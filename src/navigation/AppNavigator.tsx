@@ -8,6 +8,7 @@ import SignUpScreen from '../screens/SignupScreen';
 import MainTabs from './MainTabs';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import PaymentDetailsScreen from '../screens/PaymentDetailsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -37,6 +38,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Signup" component={SignUpScreen} />
         <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
         <Stack.Screen name="PaymentDetails" component={PaymentDetailsScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
