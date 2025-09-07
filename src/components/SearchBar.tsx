@@ -1,6 +1,4 @@
 // src/components/SearchBar.tsx
-// This component features a search bar with a linear gradient background and a filter modal.
-
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Modal, TouchableOpacity, Text } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -14,6 +12,7 @@ type RootStackParamList = {
     selectedSubjects: string[];
     selectedGrades: string[];
   };
+  // Add other screen names as needed
 };
 
 // Create a typed version of useNavigation
@@ -26,8 +25,8 @@ export default function SearchBar() {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
 
-  // Dummy data for filter options
-  const subjects = ['Physics', 'Pure Mathematics', 'Chemistry', 'Applied Mathematics'];
+  // Filter options based on your class data
+  const subjects = ['Physics', 'Chemistry', 'Combined Mathematics', 'Applied Mathematics'];
   const grades = ['Grade 12', 'Grade 13'];
 
   // Handle filter selection
@@ -45,32 +44,40 @@ export default function SearchBar() {
 
   // Handle search and navigation
   const handleSearch = () => {
-    setFilterModalVisible(false);
-    navigation.navigate('SearchResults', { searchQuery, selectedSubjects, selectedGrades });
+    if (searchQuery.trim() || selectedSubjects.length > 0 || selectedGrades.length > 0) {
+      setFilterModalVisible(false);
+      navigation.navigate('SearchResults', { 
+        searchQuery: searchQuery.trim(), 
+        selectedSubjects, 
+        selectedGrades 
+      });
+    }
   };
 
   // Reset all filters
   const handleResetFilters = () => {
     setSelectedSubjects([]);
     setSelectedGrades([]);
+    setSearchQuery('');
   };
 
   return (
     <LinearGradient
-      colors={['#1800AD', '#f11616']} // Red to Blue, you can adjust these
+      colors={['#1800AD', '#f11616']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
-      style={searchStyles.container} // The gradient now applies to the entire container
+      style={searchStyles.container}
     >
-      <View style={searchStyles.searchBarWrapper}> {/* This is the new wrapper for the search input and icons */}
+      <View style={searchStyles.searchBarWrapper}>
         <Icon name="magnify" size={20} color="#888" style={searchStyles.icon} />
         <TextInput
           style={searchStyles.input}
-          placeholder="Search by subject, grade..."
+          placeholder="Search by subject, grade, teacher..."
           placeholderTextColor="#888"
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
+          returnKeyType="search"
         />
         <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
           <Icon name="filter-variant" size={20} color="#888" style={searchStyles.icon} />
@@ -87,14 +94,26 @@ export default function SearchBar() {
         <View style={searchStyles.centeredView}>
           <View style={searchStyles.modalView}>
             <View style={searchStyles.modalHeader}>
-              <Text style={searchStyles.modalTitle}>Filter Options</Text>
+              <Text style={searchStyles.modalTitle}>Filter Classes</Text>
               <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
                 <Icon name="close" size={24} color="#000" />
               </TouchableOpacity>
             </View>
 
+            {/* Search Input in Modal */}
+            <View style={searchStyles.searchInputContainer}>
+              <Icon name="magnify" size={20} color="#888" style={searchStyles.modalIcon} />
+              <TextInput
+                style={searchStyles.modalInput}
+                placeholder="Search classes..."
+                placeholderTextColor="#888"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+
             {/* Subject Filters */}
-            <Text style={searchStyles.filterHeading}>Subject</Text>
+            <Text style={searchStyles.filterHeading}>Subjects</Text>
             <View style={searchStyles.filterOptionsContainer}>
               {subjects.map((subject) => (
                 <TouchableOpacity
@@ -118,7 +137,7 @@ export default function SearchBar() {
             </View>
 
             {/* Grade Filters */}
-            <Text style={searchStyles.filterHeading}>Grade</Text>
+            <Text style={searchStyles.filterHeading}>Grades</Text>
             <View style={searchStyles.filterOptionsContainer}>
               {grades.map((grade) => (
                 <TouchableOpacity
@@ -141,19 +160,38 @@ export default function SearchBar() {
               ))}
             </View>
 
+            {/* Selected Filters Display */}
+            {(selectedSubjects.length > 0 || selectedGrades.length > 0) && (
+              <View style={searchStyles.selectedFilters}>
+                <Text style={searchStyles.filterHeading}>Selected Filters:</Text>
+                <View style={searchStyles.selectedFiltersContainer}>
+                  {selectedSubjects.map((subject) => (
+                    <View key={subject} style={searchStyles.selectedFilterChip}>
+                      <Text style={searchStyles.selectedFilterText}>{subject}</Text>
+                    </View>
+                  ))}
+                  {selectedGrades.map((grade) => (
+                    <View key={grade} style={searchStyles.selectedFilterChip}>
+                      <Text style={searchStyles.selectedFilterText}>{grade}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {/* Action Buttons */}
             <View style={searchStyles.modalFooter}>
               <TouchableOpacity
                 style={[searchStyles.actionButton, searchStyles.resetButton]}
                 onPress={handleResetFilters}
               >
-                <Text style={searchStyles.actionButtonText}>Reset Filters</Text>
+                <Text style={searchStyles.resetButtonText}>Reset All</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[searchStyles.actionButton, searchStyles.applyButton]}
                 onPress={handleSearch}
               >
-                <Text style={searchStyles.actionButtonText}>Apply Filters</Text>
+                <Text style={searchStyles.applyButtonText}>Show Results</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -165,24 +203,28 @@ export default function SearchBar() {
 
 const searchStyles = StyleSheet.create({
   container: {
-    // The gradient component now acts as the container
     paddingHorizontal: 20,
-    paddingVertical: 15, // Added vertical padding to give the gradient some height
-    borderBottomLeftRadius: 20, // Rounded corners for the bottom of the gradient
+    paddingVertical: 15,
+    borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  searchBarWrapper: { // This new style defines the look of the search bar itself
+  searchBarWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff', // White background
+    backgroundColor: '#fff',
     borderRadius: 12,
     paddingHorizontal: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   input: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: 16,
-    color: '#333', // Dark text color for readability on a white background
+    color: '#333',
   },
   icon: {
     marginHorizontal: 5,
@@ -196,12 +238,8 @@ const searchStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 35,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    padding: 25,
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -212,25 +250,44 @@ const searchStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+  },
+  modalIcon: {
+    marginRight: 10,
+  },
+  modalInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#333',
   },
   filterHeading: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
   },
   filterOptionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: 20,
+    gap: 10,
   },
   filterButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#ddd',
-    marginRight: 10,
-    marginBottom: 10,
+    backgroundColor: '#fff',
   },
   filterButtonSelected: {
     backgroundColor: '#1800ad',
@@ -238,30 +295,58 @@ const searchStyles = StyleSheet.create({
   },
   filterButtonText: {
     color: '#333',
+    fontSize: 14,
+    fontWeight: '500',
   },
   filterButtonTextSelected: {
     color: '#fff',
   },
+  selectedFilters: {
+    marginBottom: 20,
+  },
+  selectedFiltersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  selectedFilterChip: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  selectedFilterText: {
+    color: '#1976d2',
+    fontSize: 12,
+    fontWeight: '500',
+  },
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    gap: 15,
   },
   actionButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 15,
     borderRadius: 12,
     alignItems: 'center',
   },
   resetButton: {
-    backgroundColor: '#eee',
-    marginRight: 10,
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   applyButton: {
     backgroundColor: '#1800ad',
   },
-  actionButtonText: {
-    fontWeight: 'bold',
-    color: '#333',
+  resetButtonText: {
+    color: '#666',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  applyButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
