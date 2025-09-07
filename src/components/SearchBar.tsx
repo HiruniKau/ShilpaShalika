@@ -72,7 +72,7 @@ export default function SearchBar() {
         <Icon name="magnify" size={20} color="#888" style={searchStyles.icon} />
         <TextInput
           style={searchStyles.input}
-          placeholder="Search by subject, grade, teacher..."
+          placeholder="Search by subject, grade"
           placeholderTextColor="#888"
           value={searchQuery}
           onChangeText={setSearchQuery}
