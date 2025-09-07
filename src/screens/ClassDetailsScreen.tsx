@@ -264,7 +264,7 @@ const ClassDetailsScreen: React.FC = () => {
         <View style={styles.successModalOverlay}>
           <View style={styles.successModalContent}>
             <Icon name="check-circle" size={60} color="#4CAF50" style={styles.successIcon} />
-            <Text style={styles.successTitle}>Enrollment Successful! 🎉</Text>
+            <Text style={styles.successTitle}>Enrollment Successful! </Text>
             <Text style={styles.successMessage}>
               You have successfully enrolled in:
             </Text>
