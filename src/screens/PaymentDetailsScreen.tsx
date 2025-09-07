@@ -56,7 +56,7 @@ const PaymentDetailsScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={28} color="#000" />
+          <Icon name="arrow-left" size={28} color="#1800ad" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment Details</Text>
       </View>
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    textAlign:'center',
   },
   backButton: {
     marginRight: 10,
@@ -151,7 +152,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
+    color: "#1800ad",
+    textAlign: 'center'
   },
   logo: {
     width: 200,
@@ -198,7 +200,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   card: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#dfdfdfff',
     borderRadius: 10,
     padding: 20,
     shadowColor: '#000',
@@ -222,7 +224,7 @@ const styles = StyleSheet.create({
   },
   paymentDate: {
     fontSize: 14,
-    color: '#999',
+    color: '#4f4f4fff',
     marginTop: 2,
   },
   paymentAmount: {

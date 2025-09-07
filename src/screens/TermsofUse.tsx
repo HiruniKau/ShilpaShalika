@@ -26,7 +26,7 @@ const TermsOfUseScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={28} color="#000" />
+          <Icon name="arrow-left" size={28} color="#1800ad" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Terms of Use</Text>
       </View>
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
+    color: "#1800ad",
   },
   content: {
     padding: 20,
