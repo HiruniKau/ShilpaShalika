@@ -137,18 +137,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   paragraph: {
-    fontSize: 16,
+    fontSize: 13,
     lineHeight: 24,
     marginBottom: 15,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
   },
   bulletPoint: {
-    fontSize: 16,
+    fontSize: 13,
     lineHeight: 24,
     marginBottom: 10,
   },
