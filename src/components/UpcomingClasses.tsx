@@ -166,6 +166,7 @@ const UpcomingClasses: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     marginVertical: 20,
+    marginBottom:5,
   },
   sectionTitle: {
     fontSize: 18,
@@ -188,6 +189,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    marginBottom: 5,
   },
   classHeader: {
     backgroundColor: '#f8f9fa',
