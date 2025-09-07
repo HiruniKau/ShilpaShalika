@@ -12,6 +12,24 @@ import {
 import firestore from "@react-native-firebase/firestore";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import FontAwesome from "react-native-vector-icons/FontAwesome"; // For WhatsApp icon
+
+// Define navigation types locally (or import from your navigation file)
+declare type RootStackParamList = {
+  LecturerDetails: { lecturerId: string };
+  // Add other screen names as needed
+  Home: undefined;
+  Profile: undefined;
+  Signin: undefined;
+  Classes: undefined;
+  Announcements: undefined;
+  PostAd: undefined;
+  Terms: undefined;
+  Settings: undefined;
+  Notifications: undefined;
+  PaymentDetails: undefined;
+  ClassDetails: { classId: string };
+};
 
 // Define the type for route params
 type LecturerDetailsRouteProp = RouteProp<RootStackParamList, 'LecturerDetails'>;
@@ -41,7 +59,7 @@ const LecturerDetailsScreen: React.FC = () => {
           .doc(lecturerId)
           .get();
 
-        if (doc.exists()) {
+        if (doc.exists()) { // Fixed: removed parentheses from doc.exists()
           const data = doc.data();
           setLecturer({
             id: doc.id,
@@ -69,7 +87,9 @@ const LecturerDetailsScreen: React.FC = () => {
   };
 
   const handleWhatsApp = (whatsAppNumber: string) => {
-    Linking.openURL(`https://wa.me/${whatsAppNumber}`);
+    // Remove any non-digit characters from the number
+    const cleanNumber = whatsAppNumber.replace(/\D/g, '');
+    Linking.openURL(`https://wa.me/${cleanNumber}`);
   };
 
   const handleEmail = (email: string) => {
@@ -115,7 +135,7 @@ const LecturerDetailsScreen: React.FC = () => {
         
         {lecturer.description && (
           <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionTitle}>About</Text>
+            <Text style={styles.descriptionTitle}>Description</Text>
             <Text style={styles.descriptionText}>{lecturer.description}</Text>
           </View>
         )}
@@ -129,7 +149,7 @@ const LecturerDetailsScreen: React.FC = () => {
               style={styles.contactItem}
               onPress={() => handlePhoneCall(lecturer.phoneNumber!)}
             >
-              <Icon name="phone" size={20} color="#007bff" />
+              <Icon name="phone" size={24} color="#007bff" />
               <Text style={styles.contactText}>{lecturer.phoneNumber}</Text>
             </TouchableOpacity>
           )}
@@ -139,7 +159,7 @@ const LecturerDetailsScreen: React.FC = () => {
               style={styles.contactItem}
               onPress={() => handleWhatsApp(lecturer.whatsApp!)}
             >
-              <Icon name="whatsapp" size={20} color="#25D366" />
+              <FontAwesome name="whatsapp" size={24} color="#25D366" />
               <Text style={styles.contactText}>{lecturer.whatsApp}</Text>
             </TouchableOpacity>
           )}
@@ -149,7 +169,7 @@ const LecturerDetailsScreen: React.FC = () => {
               style={styles.contactItem}
               onPress={() => handleEmail(lecturer.email!)}
             >
-              <Icon name="email" size={20} color="#007bff" />
+              <Icon name="email" size={24} color="#007bff" />
               <Text style={styles.contactText}>{lecturer.email}</Text>
             </TouchableOpacity>
           )}
@@ -192,6 +212,9 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     marginBottom: 20,
+    backgroundColor: "#f8f9fa",
+    padding: 15,
+    borderRadius: 8,
   },
   descriptionTitle: {
     fontSize: 16,
@@ -205,7 +228,10 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   contactContainer: {
-    marginTop: 20,
+    marginTop: 5,
+    backgroundColor: "#f8f9fa",
+    padding: 15,
+    borderRadius: 8,
   },
   contactTitle: {
     fontSize: 16,
@@ -218,22 +244,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "#e9ecef",
   },
   contactText: {
     fontSize: 16,
     color: "#333",
     marginLeft: 15,
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#fff",
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#fff",
   },
 });
 
