@@ -12,6 +12,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import TermsOfUseScreen from '../screens/TermsofUse';
 import NotificationScreen from '../screens/NotificationsScreen';
 import ClassDetailsScreen from '../screens/ClassDetailsScreen';
+import LecturerDetailsScreen from '../screens/LecturerDetailsScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -27,6 +28,7 @@ export type RootStackParamList = {
   Notifications: undefined;
   PaymentDetails: undefined;
   ClassDetails: undefined;
+  LecturerDetails: undefined;
 
 };
 
@@ -46,6 +48,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Terms" component={TermsOfUseScreen} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="ClassDetails" component={ClassDetailsScreen} />
+        <Stack.Screen name="LecturerDetails" component={LecturerDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

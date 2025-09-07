@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Image,
-  ScrollView,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  FlatList
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
@@ -17,8 +17,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 interface Lecturer {
   id: string;
   lecturerName: string;
-  subject: string;
   imageUrl: string;
+  subject: string;
   email?: string;
   phoneNumber?: string;
   whatsApp?: string;
@@ -37,6 +37,7 @@ const LecturerPanel: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [lecturers, setLecturers] = useState<Lecturer[]>([]);
   const [loading, setLoading] = useState(true);
+  const flatListRef = useRef<FlatList<Lecturer>>(null);
 
   useEffect(() => {
     const fetchLecturers = async () => {
@@ -51,8 +52,8 @@ const LecturerPanel: React.FC = () => {
                 lecturersData.push({
                   id: doc.id,
                   lecturerName: data.lecturerName || '',
-                  subject: data.subject || '',
                   imageUrl: data.imageUrl || '',
+                  subject: data.subject || '',
                   email: data.email,
                   phoneNumber: data.phoneNumber,
                   whatsApp: data.whatsApp,
@@ -78,9 +79,43 @@ const LecturerPanel: React.FC = () => {
     fetchLecturers();
   }, []);
 
+  // Auto-scroll logic
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      if (flatListRef.current && lecturers.length > 0) {
+        flatListRef.current.scrollToIndex({
+          index: index % lecturers.length,
+          animated: true,
+        });
+        index++;
+      }
+    }, 3000); // Scroll every 3 seconds
+    return () => clearInterval(interval);
+  }, [lecturers]);
+
   const handleLecturerPress = (lecturerId: string) => {
     navigation.navigate('LecturerDetails', { lecturerId });
   };
+
+  const renderLecturerCard = ({ item }: { item: Lecturer }) => (
+    <TouchableOpacity
+      style={styles.lecturerCard}
+      onPress={() => handleLecturerPress(item.id)}
+    >
+      {item.imageUrl ? (
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={styles.lecturerImage}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={styles.imagePlaceholder}>
+          <Text style={styles.placeholderText}>No Image</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 
   if (loading) {
     return (
@@ -93,57 +128,23 @@ const LecturerPanel: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Lecturer Panel</Text>
       
-      <ScrollView 
-        horizontal 
+      <FlatList
+        ref={flatListRef}
+        data={lecturers}
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-      >
-        {lecturers.map((lecturer) => (
-          <TouchableOpacity
-            key={lecturer.id}
-            style={styles.lecturerCard}
-            onPress={() => handleLecturerPress(lecturer.id)}
-          >
-            {lecturer.imageUrl ? (
-              <Image
-                source={{ uri: lecturer.imageUrl }}
-                style={styles.lecturerImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.placeholderText}>No Image</Text>
-              </View>
-            )}
-            
-            <View style={styles.lecturerInfo}>
-              <Text style={styles.nameText}>{lecturer.lecturerName}</Text>
-              <Text style={styles.subjectText}>{lecturer.subject}</Text>
-              
-              {lecturer.description && (
-                <Text 
-                  style={styles.descriptionText}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {lecturer.description}
-                </Text>
-              )}
-              
-              <View style={styles.contactInfo}>
-                {lecturer.phoneNumber && (
-                  <Text style={styles.contactText}>📞 {lecturer.phoneNumber}</Text>
-                )}
-                {lecturer.email && (
-                  <Text style={styles.contactText}>✉️ {lecturer.email}</Text>
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+        renderItem={renderLecturerCard}
+        keyExtractor={item => item.id}
+        snapToInterval={width * 0.5 + 16} // Smaller cards for images only
+        decelerationRate="fast"
+        getItemLayout={(data, index) => ({
+          length: width * 0.5 + 16,
+          offset: (width * 0.5 + 16) * index,
+          index,
+        })}
+      />
     </View>
   );
 };
@@ -164,7 +165,8 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   lecturerCard: {
-    width: width * 0.7,
+    width: width * 0.5, // Smaller width for image-only cards
+    height: width * 0.5, // Square cards
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',
@@ -176,11 +178,11 @@ const styles = StyleSheet.create({
   },
   lecturerImage: {
     width: '100%',
-    height: 150,
+    height: '100%',
   },
   imagePlaceholder: {
     width: '100%',
-    height: 150,
+    height: '100%',
     backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
@@ -188,35 +190,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#666',
     fontSize: 14,
-  },
-  lecturerInfo: {
-    padding: 15,
-  },
-  nameText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1800ad',
-    marginBottom: 5,
-  },
-  subjectText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#007bff',
-    marginBottom: 8,
-  },
-  descriptionText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 10,
-    lineHeight: 16,
-  },
-  contactInfo: {
-    marginTop: 5,
-  },
-  contactText: {
-    fontSize: 12,
-    color: '#555',
-    marginBottom: 3,
   },
   loadingContainer: {
     padding: 20,
