@@ -1,103 +1,226 @@
-// src/components/UpcomingClasses.tsx
-// This component fetches and renders a list of upcoming class images from Firestore.
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  Dimensions
+} from "react-native";
+import firestore from "@react-native-firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
-
-// Define the interface for our class data to ensure type safety
-interface ClassData {
+// Define the type for your class data
+interface ClassDetail {
   id: string;
-  image: string; // This will be the image URL from Firestore
+  className: string;
+  imageUrl: string;
+  examYear: string;
+  subject: string;
+  teacherName: string;
+  adminSionFee?: string;
+  duration?: string;
+  medium?: string;
+  type?: string;
 }
 
-export default function UpcomingClasses() {
-  const [classes, setClasses] = useState<ClassData[]>([]);
+// Define navigation types
+declare type RootStackParamList = {
+  ClassDetails: { classId: string };
+  // Add other screen names as needed
+};
+
+const { width } = Dimensions.get('window');
+
+const UpcomingClasses: React.FC = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [classes, setClasses] = useState<ClassDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // useEffect hook to fetch data from Firestore when the component mounts
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        // Get a reference to the 'classes' collection in Firestore
-        const snapshot = await firestore().collection('classes').get();
-        
-        // Map the Firestore documents to our ClassData interface, only getting the image field
-        const fetchedClasses: ClassData[] = snapshot.docs.map(doc => ({
-          id: doc.id,
-          image: doc.data().image,
-        }));
-        
-        setClasses(fetchedClasses);
+        const unsubscribe = firestore()
+          .collection("classDetails")
+          .onSnapshot(
+            (querySnapshot) => {
+              const classesData: ClassDetail[] = [];
+              querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                classesData.push({
+                  id: doc.id,
+                  className: data.className || '',
+                  imageUrl: data.imageUrl || '',
+                  examYear: data.examYear || '',
+                  subject: data.subject || '',
+                  teacherName: data.teacherName || '',
+                  adminSionFee: data.adminSionFee,
+                  duration: data.duration,
+                  medium: data.medium,
+                  type: data.type
+                });
+              });
+              setClasses(classesData);
+              setLoading(false);
+            },
+            (error) => {
+              console.error("Error fetching classes:", error);
+              setLoading(false);
+            }
+          );
+
+        return () => unsubscribe();
       } catch (error) {
-        console.error("Failed to fetch classes from Firestore:", error);
-      } finally {
+        console.error("Error setting up Firestore listener:", error);
         setLoading(false);
       }
     };
 
     fetchClasses();
-  }, []); // The empty dependency array ensures this effect runs only once
+  }, []);
+
+  const handleClassPress = (classId: string) => {
+    navigation.navigate('ClassDetails', { classId });
+  };
 
   if (loading) {
     return (
-      <View style={classStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1800ad" />
-      </View>
-    );
-  }
-
-  // Handle the case where no classes are found
-  if (classes.length === 0) {
-    return (
-      <View style={classStyles.emptyContainer}>
-        <Text style={classStyles.emptyText}>No upcoming classes available.</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading classes...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={classStyles.scrollView}>
-      {classes.map((item) => (
-        <View key={item.id} style={classStyles.card}>
-          {/* Use source={{ uri: item.image }} to load the image from the URL */}
-          <Image source={{ uri: item.image }} style={classStyles.image} />
-        </View>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Upcoming New Classes</Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {classes.map((classItem) => (
+          <TouchableOpacity
+            key={classItem.id}
+            style={styles.classCard}
+            onPress={() => handleClassPress(classItem.id)}
+          >
+            <View style={styles.classHeader}>
+              <Text style={styles.yearText}>{classItem.examYear}</Text>
+              <Text style={styles.levelText}>ADVANCED LEVEL</Text>
+            </View>
+            
+            {classItem.imageUrl ? (
+              <Image
+                source={{ uri: classItem.imageUrl }}
+                style={styles.classImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.placeholderText}>No Image</Text>
+              </View>
+            )}
+            
+            <View style={styles.classInfo}>
+              <Text style={styles.subjectText}>{classItem.subject}</Text>
+              <Text style={styles.teacherText}>Lecturer: {classItem.teacherName}</Text>
+              {classItem.adminSionFee && (
+                <Text style={styles.feeText}>{classItem.adminSionFee}/Month</Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
-}
+};
 
-const classStyles = StyleSheet.create({
-  scrollView: {
-    paddingRight: 20,
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 20,
   },
-  card: {
-    width: 250,
-    height: 150,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    paddingHorizontal: 16,
+    color: '#333',
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    gap: 15,
+  },
+  classCard: {
+    width: width * 0.7,
+    backgroundColor: '#fff',
     borderRadius: 12,
-    marginRight: 15,
     overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  image: {
+  classHeader: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  yearText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  levelText: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
+  classImage: {
     width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    height: 150,
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: 150,
+    backgroundColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  classInfo: {
+    padding: 15,
+  },
+  subjectText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  teacherText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  feeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007bff',
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    padding: 20,
     alignItems: 'center',
-    height: 150, // Match the height of the card for consistent layout
-  },
-  emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    height: 150,
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
   },
 });
+
+export default UpcomingClasses;

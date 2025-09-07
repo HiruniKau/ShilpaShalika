@@ -15,7 +15,7 @@ const headerStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
     backgroundColor: '#fff', // Or a different color based on your design
   },
   logo: {
