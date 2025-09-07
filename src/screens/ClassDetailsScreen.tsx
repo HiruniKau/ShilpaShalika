@@ -43,6 +43,7 @@ const ClassDetailsScreen: React.FC = () => {
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState<ClassDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
   const [yearModalVisible, setYearModalVisible] = useState(false);
   const [monthModalVisible, setMonthModalVisible] = useState(false);
   const [enrollSuccessModalVisible, setEnrollSuccessModalVisible] = useState(false);
@@ -63,7 +64,7 @@ const ClassDetailsScreen: React.FC = () => {
           .doc(classId)
           .get();
 
-        if (doc.exists()) { // Fixed: removed parentheses from doc.exists
+        if (doc.exists()) {
           const data = doc.data();
           setClassDetail({
             id: doc.id,
@@ -98,14 +99,68 @@ const ClassDetailsScreen: React.FC = () => {
 
     if (!classDetail) return;
 
+    setEnrolling(true);
+
     try {
-      // SIMULATED SUCCESS - Without Firestore
-      // Show success modal with sample message
+      // Create a unique enrollment ID (combination of studentId + classId + timestamp)
+      const enrollmentId = `${user.uid}_${classId}_${Date.now()}`;
+      
+      // Create enrollment document in 'enrollments' collection
+      const enrollmentData = {
+        enrollmentId: enrollmentId,
+        studentId: user.uid,
+        studentName: user.displayName || user.email || 'Student',
+        classId: classId,
+        className: classDetail.className,
+        subject: classDetail.subject,
+        teacherName: classDetail.teacherName,
+        examYear: selectedYear,
+        enrollmentMonth: selectedMonth,
+        enrollmentDate: firestore.FieldValue.serverTimestamp(),
+        duration: classDetail.duration,
+        medium: classDetail.medium,
+        type: classDetail.type,
+        admissionFee: classDetail.admissionFee,
+        status: "active",
+        grade: classDetail.grade || "Not specified"
+      };
+
+      // Save to enrollments collection
+      await firestore()
+        .collection("enrollments")
+        .doc(enrollmentId)
+        .set(enrollmentData);
+
+      // Also update the student's document with this enrollment
+      await firestore()
+        .collection("students")
+        .doc(user.uid)
+        .update({
+          enrollments: firestore.FieldValue.arrayUnion(enrollmentId),
+          updatedAt: firestore.FieldValue.serverTimestamp()
+        });
+
+      // Create announcement for the enrollment
+      const announcementData = {
+        title: "New Class Enrollment",
+        message: `${user.displayName || 'A student'} has enrolled in ${classDetail.subject} class for ${selectedYear} ${selectedMonth}`,
+        type: "enrollment",
+        timestamp: firestore.FieldValue.serverTimestamp(),
+        classId: classId,
+        studentId: user.uid,
+        studentName: user.displayName || 'Student'
+      };
+
+      await firestore().collection("announcements").add(announcementData);
+
+      // Show success modal
       setEnrollSuccessModalVisible(true);
       
     } catch (error) {
       console.error("Error enrolling:", error);
       Alert.alert("Error", "Failed to enroll. Please try again.");
+    } finally {
+      setEnrolling(false);
     }
   };
 
@@ -197,8 +252,16 @@ const ClassDetailsScreen: React.FC = () => {
         </View>
 
         {/* Enroll Now Button */}
-        <TouchableOpacity style={styles.enrollButton} onPress={handleEnrollNow}>
-          <Text style={styles.enrollButtonText}>Enroll Now</Text>
+        <TouchableOpacity 
+          style={[styles.enrollButton, enrolling && styles.enrollButtonDisabled]}
+          onPress={handleEnrollNow}
+          disabled={enrolling}
+        >
+          {enrolling ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.enrollButtonText}>Enroll Now</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -264,12 +327,12 @@ const ClassDetailsScreen: React.FC = () => {
         <View style={styles.successModalOverlay}>
           <View style={styles.successModalContent}>
             <Icon name="check-circle" size={60} color="#4CAF50" style={styles.successIcon} />
-            <Text style={styles.successTitle}>Enrollment Successful! </Text>
+            <Text style={styles.successTitle}>Enrollment Successful!</Text>
             <Text style={styles.successMessage}>
               You have successfully enrolled in:
             </Text>
             <Text style={styles.classInfoText}>
-               {classDetail.subject}
+              {classDetail.subject}
             </Text>
             <Text style={styles.classInfoText}>
                {classDetail.teacherName}
@@ -278,20 +341,21 @@ const ClassDetailsScreen: React.FC = () => {
                {selectedYear} {selectedMonth}
             </Text>
             <Text style={styles.classInfoText}>
-              {classDetail.duration}
+             {classDetail.duration}
             </Text>
             
             <View style={styles.successDivider} />
             
             <Text style={styles.successNote}>
-              Your enrollment has been confirmed. You will receive class materials and schedule soon.
+              Your enrollment has been confirmed and saved to your profile.
+              You will receive class materials and schedule soon.
             </Text>
             
             <TouchableOpacity 
               style={styles.successButton}
               onPress={() => setEnrollSuccessModalVisible(false)}
             >
-              <Text style={styles.successButtonText}>Got It!</Text>
+              <Text style={styles.successButtonText}>Continue</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -442,6 +506,11 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 50,
+  },
+  enrollButtonDisabled: {
+    backgroundColor: "#ccc",
   },
   enrollButtonText: {
     color: "#fff",
