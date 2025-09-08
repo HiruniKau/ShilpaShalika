@@ -5,14 +5,14 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Define the type for your navigation stack and its parameters
+// Define the type for navigation stack and its parameters
 type RootStackParamList = {
   SearchResults: {
     searchQuery: string;
     selectedSubjects: string[];
     selectedGrades: string[];
   };
-  // Add other screen names as needed
+  
 };
 
 // Create a typed version of useNavigation
@@ -25,7 +25,7 @@ export default function SearchBar() {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
 
-  // Filter options based on your class data
+  // Filter options based on class data
   const subjects = ['Physics', 'Chemistry', 'Combined Mathematics', 'Applied Mathematics'];
   const grades = ['Grade 12', 'Grade 13'];
 

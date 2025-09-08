@@ -28,7 +28,7 @@ interface Lecturer {
 // Define navigation types
 declare type RootStackParamList = {
   LecturerDetails: { lecturerId: string };
-  // Add other screen names as needed
+
 };
 
 const { width } = Dimensions.get('window');
@@ -137,7 +137,7 @@ const LecturerPanel: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         renderItem={renderLecturerCard}
         keyExtractor={item => item.id}
-        snapToInterval={width * 0.5 + 16} // Smaller cards for images only
+        snapToInterval={width * 0.5 + 16} 
         decelerationRate="fast"
         getItemLayout={(data, index) => ({
           length: width * 0.5 + 16,
@@ -165,8 +165,8 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   lecturerCard: {
-    width: width * 0.5, // Smaller width for image-only cards
-    height: width * 0.5, // Square cards
+    width: width * 0.5, 
+    height: width * 0.5, 
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',

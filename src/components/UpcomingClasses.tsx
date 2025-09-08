@@ -14,7 +14,7 @@ import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// Define the type for your class data
+// Define the type for class data
 interface ClassDetail {
   id: string;
   className: string;
@@ -31,7 +31,7 @@ interface ClassDetail {
 // Define navigation types
 declare type RootStackParamList = {
   ClassDetails: { classId: string };
-  // Add other screen names as needed
+ 
 };
 
 const { width } = Dimensions.get('window');

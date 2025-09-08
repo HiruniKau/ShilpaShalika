@@ -12,7 +12,7 @@ import {
 import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// The navigation prop type is assumed to be the same as in your SignUpScreen
+
 export default function SignInScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

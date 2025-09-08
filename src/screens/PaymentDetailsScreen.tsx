@@ -13,7 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import LinearGradient from "react-native-linear-gradient";
 
-// NOTE: You will need to define this type based on your AppNavigator setup.
+
 declare type RootStackParamList = {
   Signin: undefined;
   Home: undefined;

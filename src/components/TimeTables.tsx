@@ -20,7 +20,7 @@ interface Timetable {
   imageUrl: string;
   lecturerName?: string;
   subject?: string;
-  // Add other fields as needed from your collection
+  
 }
 
 const { width } = Dimensions.get('window');
@@ -47,7 +47,7 @@ const Timetable: React.FC = () => {
                   imageUrl: data.imageUrl || '',
                   lecturerName: data.lecturerName,
                   subject: data.subject
-                  // Add other fields as needed
+             
                 });
               });
               setTimetables(timetablesData);

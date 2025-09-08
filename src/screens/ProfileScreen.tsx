@@ -18,18 +18,16 @@ import * as ImagePicker from "react-native-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// NOTE: You will need to define this type based on your AppNavigator setup.
+
 declare type RootStackParamList = {
   Signin: undefined;
   Home: undefined;
   Classes: undefined;
   Announcements: undefined;
   Profile: undefined;
-  // Add other screen names here as needed
   PostAd: undefined;
   Terms: undefined;
   Settings: undefined;
-  Notifications: undefined;
   PaymentDetails: undefined;
 };
 
@@ -279,10 +277,6 @@ const ProfileScreen = () => {
               <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('Terms'); setMenuVisible(false); }}>
                 <Icon name="file-document" size={20} color="#1800ad" />
                 <Text style={styles.menuItemText}>Terms of Use</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('Notifications'); setMenuVisible(false); }}>
-                <Icon name="bell" size={20} color="#1800ad" />
-                <Text style={styles.menuItemText}>Notifications</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -19,7 +19,7 @@ import auth from "@react-native-firebase/auth";
 // Define navigation types locally
 declare type RootStackParamList = {
   ClassDetails: { classId: string };
-  // Add other screen names as needed
+
 };
 
 type ClassDetailsRouteProp = RouteProp<RootStackParamList, 'ClassDetails'>;
@@ -122,7 +122,8 @@ const ClassDetailsScreen: React.FC = () => {
         type: classDetail.type,
         admissionFee: classDetail.admissionFee,
         status: "active",
-        grade: classDetail.grade || "Not specified"
+        grade: classDetail.grade || "Not specified",
+        imageUrl: classDetail.imageUrl // Add imageUrl to enrollment
       };
 
       // Save to enrollments collection

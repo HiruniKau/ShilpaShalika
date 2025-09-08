@@ -12,12 +12,12 @@ import {
 import firestore from "@react-native-firebase/firestore";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome"; // For WhatsApp icon
+import FontAwesome from "react-native-vector-icons/FontAwesome"; 
 
-// Define navigation types locally (or import from your navigation file)
+// Define navigation types locally 
 declare type RootStackParamList = {
   LecturerDetails: { lecturerId: string };
-  // Add other screen names as needed
+ 
   Home: undefined;
   Profile: undefined;
   Signin: undefined;
@@ -59,7 +59,7 @@ const LecturerDetailsScreen: React.FC = () => {
           .doc(lecturerId)
           .get();
 
-        if (doc.exists()) { // Fixed: removed parentheses from doc.exists()
+        if (doc.exists()) { 
           const data = doc.data();
           setLecturer({
             id: doc.id,

@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-// NOTE: You will need to define this type based on your AppNavigator setup.
 declare type RootStackParamList = {
   Signin: undefined;
   Home: undefined;

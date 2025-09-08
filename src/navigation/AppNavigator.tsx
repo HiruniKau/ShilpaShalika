@@ -10,7 +10,6 @@ import SearchResultsScreen from '../screens/SearchResultsScreen';
 import PaymentDetailsScreen from '../screens/PaymentDetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TermsOfUseScreen from '../screens/TermsofUse';
-import NotificationScreen from '../screens/NotificationsScreen';
 import ClassDetailsScreen from '../screens/ClassDetailsScreen';
 import LecturerDetailsScreen from '../screens/LecturerDetailsScreen';
 
@@ -46,7 +45,6 @@ export default function AppNavigator() {
         <Stack.Screen name="PaymentDetails" component={PaymentDetailsScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Terms" component={TermsOfUseScreen} />
-        <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="ClassDetails" component={ClassDetailsScreen} />
         <Stack.Screen name="LecturerDetails" component={LecturerDetailsScreen} />
       </Stack.Navigator>

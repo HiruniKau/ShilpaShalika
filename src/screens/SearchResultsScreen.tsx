@@ -23,7 +23,7 @@ declare type RootStackParamList = {
     selectedGrades: string[];
   };
   ClassDetails: { classId: string };
-  // Add other screen names as needed
+
 };
 
 type SearchResultsRouteProp = RouteProp<RootStackParamList, 'SearchResults'>;

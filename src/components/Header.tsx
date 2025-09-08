@@ -1,5 +1,5 @@
 // src/components/Header.tsx
-// This will contain the app logo and name.
+
 import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 
@@ -16,7 +16,7 @@ const headerStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#fff', // Or a different color based on your design
+    backgroundColor: '#fff', 
   },
   logo: {
     width: 250,
